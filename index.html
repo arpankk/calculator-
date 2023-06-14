@@ -16,27 +16,31 @@
     }
 
     .calculator {
-      width: 250px;
+      width: 350px;
+      height: 490px;
       border: 1px solid #ccc;
       border-radius: 8px;
       box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
       padding: 10px;
-      background-color: #e0d0d0de;
+      background-color: rgba(178, 178, 235, 0.808);
       font-family: Arial, sans-serif;
     }
 
     .calculator input[type="text"] {
       width: 100%;
       padding: 10px;
-      font-size: 16px;
+      font-size: 20px;
       border: 1px solid #ccc;
       border-radius: 4px;
       margin-bottom: 10px;
+      text-align: right;
+      box-sizing: border-box;
+      overflow: hidden;
     }
 
     .calculator input[type="button"] {
-      width: 50px;
-      height: 80px;
+      width: 70px;
+      height: 60px;
       margin: 5px;
       font-size: 16px;
       border-radius: 4px;
@@ -68,10 +72,22 @@
   <div class="calculator">
     <input type="text" id="result" readonly><br>
     <div class="row">
-      <input type="button" value="1" onclick="appendNumber(1)">
-      <input type="button" value="2" onclick="appendNumber(2)">
-      <input type="button" value="3" onclick="appendNumber(3)">
-      <input type="button" value="+" onclick="appendOperator('+')">
+      <input type="button" value="C" onclick="clearResult()">
+      <input type="button" value="←" onclick="backspace()">
+      <input type="button" value="sin" onclick="calculateTrig('sin')">
+      <input type="button" value="cos" onclick="calculateTrig('cos')">
+      <input type="button" value="tan" onclick="calculateTrig('tan')">
+    </div>
+    <div class="row">
+      <input type="button" value="RAD" onclick="toggleRadians()">
+      <input type="button" value="log" onclick="calculateLog()">
+      <input type="button" value="ln" onclick="calculateLn()">
+    </div>
+    <div class="row">
+      <input type="button" value="7" onclick="appendNumber(7)">
+      <input type="button" value="8" onclick="appendNumber(8)">
+      <input type="button" value="9" onclick="appendNumber(9)">
+      <input type="button" value="&times;" onclick="appendOperator('*')">
     </div>
     <div class="row">
       <input type="button" value="4" onclick="appendNumber(4)">
@@ -80,23 +96,22 @@
       <input type="button" value="-" onclick="appendOperator('-')">
     </div>
     <div class="row">
-      <input type="button" value="7" onclick="appendNumber(7)">
-      <input type="button" value="8" onclick="appendNumber(8)">
-      <input type="button" value="9" onclick="appendNumber(9)">
-      <input type="button" value="*" onclick="appendOperator('*')">
+      <input type="button" value="1" onclick="appendNumber(1)">
+      <input type="button" value="2" onclick="appendNumber(2)">
+      <input type="button" value="3" onclick="appendNumber(3)">
+      <input type="button" value="+" onclick="appendOperator('+')">
     </div>
     <div class="row">
       <input type="button" value="0" onclick="appendNumber(0)">
       <input type="button" value="." onclick="appendNumber('.')">
       <input type="button" value="=" onclick="calculate()">
-      <input type="button" value="/" onclick="appendOperator('/')">
-    </div>
-    <div class="row">
-      <input type="button" value="C" onclick="clearResult()">
+      <input type="button" value="&divide;" onclick="appendOperator('/')">
     </div>
   </div>
 
   <script>
+    let isRadians = false;
+
     function appendNumber(number) {
       document.getElementById('result').value += number;
     }
@@ -106,12 +121,94 @@
     }
 
     function calculate() {
-      const result = eval(document.getElementById('result').value);
+      let result;
+      try {
+        result = eval(document.getElementById('result').value);
+        if (isNaN(result)) {
+          throw new Error('Invalid Expression');
+        }
+      } catch (error) {
+        result = 'Invalid Expression';
+      }
       document.getElementById('result').value = result;
     }
 
     function clearResult() {
       document.getElementById('result').value = '';
+    }
+
+    function backspace() {
+      const currentResult = document.getElementById('result').value;
+      document.getElementById('result').value = currentResult.slice(0, -1);
+    }
+
+    function calculateTrig(trigFunction) {
+      const input = document.getElementById('result').value;
+      let result;
+
+      if (isNaN(input)) {
+        result = 'Invalid Input';
+      } else {
+        const angle = parseFloat(input);
+        if (isRadians) {
+          result = calculateTrigRadians(angle, trigFunction);
+        } else {
+          result = calculateTrigDegrees(angle, trigFunction);
+        }
+      }
+
+      document.getElementById('result').value = result;
+    }
+
+    function calculateTrigRadians(angle, trigFunction) {
+      if (trigFunction === 'sin') {
+        return Math.sin(angle);
+      } else if (trigFunction === 'cos') {
+        return Math.cos(angle);
+      } else if (trigFunction === 'tan') {
+        return Math.tan(angle);
+      }
+    }
+
+    function calculateTrigDegrees(angle, trigFunction) {
+      const radians = degreesToRadians(angle);
+      return calculateTrigRadians(radians, trigFunction);
+    }
+
+    function degreesToRadians(degrees) {
+      return degrees * (Math.PI / 180);
+    }
+
+    function toggleRadians() {
+      isRadians = !isRadians;
+      const button = document.querySelector('input[value="RAD"]');
+      button.style.backgroundColor = isRadians ? 'green' : '#f0f0f0';
+    }
+
+    function calculateLog() {
+      const input = document.getElementById('result').value;
+      let result;
+
+      if (isNaN(input) || parseFloat(input) <= 0) {
+        result = 'Invalid Input';
+      } else {
+        result = Math.log10(parseFloat(input));
+      }
+
+      document.getElementById('result').value = result;
+    }
+
+    function calculateLn() {
+      const input = document.getElementById('result').value;
+      let result;
+
+      if (isNaN(input) || parseFloat(input) <= 0) {
+        result = 'Invalid Input';
+      } else {
+        result = Math.log(parseFloat(input));
+      }
+
+      document.getElementById('result').value = result;
     }
   </script>
 </body>
